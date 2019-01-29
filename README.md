@@ -5,7 +5,6 @@ Project for clustering methods comparing:
 * Streaming KMeans (MLlib, Spark Streaming)
 * CluStream (StreamDM)
 
-First, packaged streamDM.jar lib have to be added to module dependencies.
 [StreamDM](http://huawei-noah.github.io/streamDM/) is a new open source software for mining big data streams using Spark Streaming. 
 
 ## Preparations
@@ -16,6 +15,8 @@ From the main folder of StreamDM, enter the following command to generate the pa
 ```
 sbt package
 ```
+Compiled streamDM.jar must be added to module dependencies.
+
 ### Current environment
 * Spark 2.3.0
 * Scala 2.11.8
