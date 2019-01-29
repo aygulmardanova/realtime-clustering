@@ -1,14 +1,13 @@
 package kai.griat.rcse
 
+import Utils._
+
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.mllib.clustering.{KMeans, KMeansModel}
 import org.apache.spark.mllib.linalg.Vectors
 
 object KMeansExample {
-
-    val def_filename = "src/main/resources/prices2.csv"
-    val trained_models_dir = "output/trainedModels/KMeansModel"
 
     def main(args: Array[String]): Unit = {
         Logger.getLogger("org").setLevel(Level.OFF)
@@ -22,26 +21,26 @@ object KMeansExample {
         // SparkContext
         val sc = new SparkContext(conf)
 
-        // Load and parse the data
-        val data = sc.textFile(def_filename)
-        val parsedData = data.map { line =>
+        // Load and parse the training and test data
+        val trainingData = sc.textFile(train_filename)
+          .map { line =>
             val parts = line.split(';')
             Vectors.dense(parts(0).split(' ').map(_.toDouble))
         }.cache()
 
-        // Split data into training and test
-        val parsedDataSplits = parsedData.randomSplit(Array(0.3, 0.7), seed = 11L)
+        val testData = sc.textFile(test_filename)
+          .map { line =>
+              val parts = line.split(';')
+              Vectors.dense(parts(0).split(' ').map(_.toDouble))
+          }.cache()
 
-        val trainingData = parsedDataSplits(0)
-        val testData = parsedDataSplits(1)
-
-        // Cluster the data into classes using KMeans
-        val numClusters = 5
+        // Train model to cluster the data into classes using KMeans
+        val numClusters = 3
         val numIterations = 20
         val clusters = KMeans.train(trainingData, numClusters, numIterations)
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
-        val WSSSE = clusters.computeCost(parsedData)
+        val WSSSE = clusters.computeCost(trainingData)
         println(s"Within Set Sum of Squared Errors = $WSSSE")
 
         // Save and load model
