@@ -34,7 +34,7 @@ class Clus extends Task {
 
         clusterer.microclusters.horizonOption.setValue(1)
         clusterer.initOption.setValue(2000)
-        clusterer.kOption.setValue(8)
+        clusterer.kOption.setValue(4)
         clusterer.mcOption.setValue(50)
 //        clusterer.repOption.setValue(10)
 
@@ -81,10 +81,6 @@ object CluStreamExample {
         val sc = new SparkContext(conf)
         sc.setLogLevel("ERROR")
         val ssc = new StreamingContext(sc, Milliseconds(100))
-
-
-        val numDimensions = 1
-        val numClusters = 3
 
         val task = new Clus()
         task.run(ssc)
