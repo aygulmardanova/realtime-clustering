@@ -2,8 +2,7 @@ package kai.griat.rcse.streamdm
 
 import com.github.javacliparser.ClassOption
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.streamdm.clusterers.{Clusterer, Clustream}
-import org.apache.spark.streamdm.core.Learner
+import org.apache.spark.streamdm.clusterers.{Clustream}
 import org.apache.spark.streamdm.evaluation.Evaluator
 import org.apache.spark.streamdm.streams.{StreamReader, StreamWriter}
 import org.apache.spark.streamdm.tasks.Task
@@ -43,17 +42,14 @@ class Clus extends Task {
         val listener = new MyListener(clusterer, N)
         ssc.addStreamingListener(listener)
         val instances = reader.getExamples(ssc)
-//
-//        //Predict
-//         val predPairs = learner.predict(instances)
-//        //Train
+
+        //Train
         clusterer.train(instances)
-//        //Assign
+        //Assign
         val clpairs = clusterer.assign(instances)
 
-//        //Print statistics
+        //Print statistics
          writer.output(evaluator.addResult(clpairs))
-
     }
 }
 
