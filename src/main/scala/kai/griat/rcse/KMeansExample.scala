@@ -15,8 +15,8 @@ object KMeansExample {
 
         // Initialize spark configurations
         val conf = new SparkConf()
-        .setAppName("example class")
-        .setMaster("local[2]")
+          .setAppName("example class")
+          .setMaster("local[2]")
 
         // SparkContext
         val sc = new SparkContext(conf)
@@ -24,9 +24,9 @@ object KMeansExample {
         // Load and parse the training and test data
         val trainingData = sc.textFile(train_filename)
           .map { line =>
-            val parts = line.split(';')
-            Vectors.dense(parts(0).split(' ').map(_.toDouble))
-        }.cache()
+              val parts = line.split(';')
+              Vectors.dense(parts(0).split(' ').map(_.toDouble))
+          }.cache()
 
         val testData = sc.textFile(test_filename)
           .map { line =>
@@ -35,19 +35,31 @@ object KMeansExample {
           }.cache()
 
         // Train model to cluster the data into classes using KMeans
-        val numClusters = 3
+        val numClusters = 4
         val numIterations = 20
+        val startTraining = System.currentTimeMillis()
         val clusters = KMeans.train(trainingData, numClusters, numIterations)
+        val endTraining = System.currentTimeMillis()
+        println("Training time: " + (endTraining - startTraining) + "ms")
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
         val WSSSE = clusters.computeCost(trainingData)
         println(s"Within Set Sum of Squared Errors = $WSSSE")
 
+        // Print cluster centers
+        println("\n================= CENTERS =================")
+        clusters.clusterCenters.foreach(println)
+        println()
+
         // Save and load model
         clusters.save(sc, trained_models_dir)
         val trainedModel = KMeansModel.load(sc, trained_models_dir)
 
-        val filtered = testData.filter(v => trainedModel.predict(v) >= 0)
-        filtered.foreach(v => println(v + " - " + trainedModel.predict(v)))
+        testData.foreach(v => {
+            val startPredicting = System.nanoTime()
+            val predicted = trainedModel.predict(v)
+            val endPredicting = System.nanoTime()
+            println(v + " - " + predicted + ". Predicting time: " + (endPredicting - startPredicting) + "ns")
+        })
     }
 }

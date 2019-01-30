@@ -22,18 +22,17 @@ object StreamingKMeans {
         sc.setLogLevel("ERROR")
 
         val ssc = new StreamingContext(sc, Milliseconds(1000))
-        /*val trainingData = ssc.textFileStream(train_filename)
+
+        val trainData = ssc.socketTextStream("localhost", 9999)
           .map(_.split(" "))
-          .map(arr => arr.dropRight(1))
           .map(_.mkString("[", ",", "]"))
-          .map(Vectors.parse)*/
+          .map(Vectors.parse)
 
-        val trainingData = ssc.socketTextStream("localhost", 9999).map(_.split(" ")).map(_.mkString("[", ",", "]")).map(Vectors.parse)
-
-        val testData = ssc.socketTextStream("localhost", 9998).map(l => Vectors.dense(l.toDouble))
+        val testData = ssc.socketTextStream("localhost", 9998)
+          .map(l => Vectors.dense(l.toDouble))
 
         val numDimensions = 1
-        val numClusters = 3
+        val numClusters = 4
         val model = new StreamingKMeans()
           .setK(numClusters)
           .setHalfLife(1000, "points")
@@ -44,8 +43,7 @@ object StreamingKMeans {
         val listener = new MyListener(model, N, sc)
         ssc.addStreamingListener(listener)
 
-        model.trainOn(trainingData)
-
+        model.trainOn(trainData)
         model.predictOn(testData).print()
 
         ssc.start()
@@ -64,7 +62,7 @@ class MyListener(model: StreamingKMeans, n: StaticVar[Long], sc: SparkContext) e
 
             // Evaluate clustering by computing Within Set Sum of Squared Errors
             // (at the end of the training process)
-            if (n.value == 1000) {
+            if (n.value == 1000 || n.value == 2000 || n.value == 3000) {
                 evaluateWSSSE()
             }
         }

@@ -34,7 +34,7 @@ class Clus extends Task {
 
         clusterer.microclusters.horizonOption.setValue(1)
         clusterer.initOption.setValue(2000)
-        clusterer.kOption.setValue(3)
+        clusterer.kOption.setValue(8)
         clusterer.mcOption.setValue(50)
 //        clusterer.repOption.setValue(10)
 
@@ -62,7 +62,7 @@ class MyListener(model: Clustream, n: StaticVar[Long]) extends StreamingListener
         if (batchCompleted.batchInfo.numRecords > 0) {
             n.value = n.value + batchCompleted.batchInfo.numRecords
             println("================= CENTERS ================= N = " + n.value)
-            model.clusters.foreach(c => println(c.toString()))
+            model.clusters.foreach(println)
             println()
         }
     }
